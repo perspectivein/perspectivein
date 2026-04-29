@@ -4,9 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="The Perspective IN — Independent journalism. Unfiltered perspective.">
-<meta property="og:title" content="The Perspective IN">
-<meta property="og:description" content="Independent journalism. Unfiltered perspective.">
-<meta property="og:type" content="website">
+<!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+<meta property="og:title" content="The Perspective IN" id="og-title">
+<meta property="og:description" content="Independent journalism. Unfiltered perspective." id="og-desc">
+<meta property="og:type" content="article">
+<meta property="og:url" content="" id="og-url">
+<meta property="og:image" content="" id="og-image">
+<meta property="og:site_name" content="The Perspective IN">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" id="tw-card">
+<meta name="twitter:title" content="The Perspective IN" id="tw-title">
+<meta name="twitter:description" content="Independent journalism. Unfiltered perspective." id="tw-desc">
+<meta name="twitter:image" content="" id="tw-image">
+<meta name="twitter:site" content="@perspectivein81">
 <meta name="theme-color" content="#3B1F3A">
 <title>The Perspective IN</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -409,6 +419,27 @@ textarea.fi{resize:vertical;min-height:80px;}
   .related-grid{grid-template-columns:1fr;}
   .share-bar{gap:6px;}
 }
+/* ══ BULK PUBLISH ══ */
+.bulk-drop{border:2px dashed var(--border);padding:32px 20px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;background:var(--bg3);}
+.bulk-drop:hover,.bulk-drop.drag{border-color:var(--amber);background:rgba(200,136,42,.05);}
+.bulk-table-wrap{overflow-x:auto;max-height:280px;overflow-y:auto;border:1px solid var(--border);}
+.bulk-table{width:100%;border-collapse:collapse;font-size:12px;}
+.bulk-table th{background:var(--bg3);padding:8px 10px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);position:sticky;top:0;}
+.bulk-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle;}
+.bulk-table tr:last-child td{border-bottom:none;}
+.bulk-table tr:hover td{background:var(--bg3);}
+.bulk-status-badge{font-size:9px;padding:2px 7px;font-weight:600;letter-spacing:.08em;}
+.bulk-status-ok{background:rgba(46,204,113,.15);color:#27ae60;}
+.bulk-status-err{background:rgba(231,76,60,.15);color:#e74c3c;}
+.bulk-progress-bar{height:6px;background:var(--bg3);border:1px solid var(--border);}
+.bulk-progress-fill{height:100%;background:var(--amber);transition:width .3s;width:0%;}
+
+/* ══ INSTAGRAM STORY ══ */
+.insta-style-btn{flex:1;padding:6px 4px;border:1.5px solid var(--border);background:var(--bg3);color:var(--ink);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;text-align:center;}
+.insta-style-btn.active{border-color:var(--amber);color:var(--amber);font-weight:600;}
+.spin-icon{animation:spin .8s linear infinite;}
+@keyframes spin-icon{to{transform:rotate(360deg);}}
+
 /* ══ LIVE STREAM ══ */
 .go-live-btn{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;display:flex;align-items:center;font-weight:600;letter-spacing:.04em;}
 .go-live-btn:hover{background:linear-gradient(135deg,#c0392b,#96281b);}
@@ -839,6 +870,116 @@ body{top:0!important;}
   </div>
 </div>
 
+<!-- BULK PUBLISH MODAL -->
+<div class="ov" id="bulk-modal" style="z-index:560;">
+  <div class="ov-box">
+    <button class="ov-close" type="button" onclick="closeOv('bulk-modal')">×</button>
+    <div class="ov-hdr" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h2 style="display:flex;align-items:center;gap:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Bulk Publish
+        </h2>
+        <p>Upload a JSON or CSV file with multiple articles to publish at once.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="#" onclick="downloadBulkTemplate();return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Template
+      </a>
+    </div>
+    <div class="ov-body">
+      <!-- Upload zone -->
+      <div class="bulk-drop" id="bulk-drop" onclick="document.getElementById('bulk-file-inp').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="onBulkDrop(event)">
+        <input type="file" id="bulk-file-inp" accept=".json,.csv" style="display:none" onchange="onBulkFile(event)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div style="margin-top:10px;font-size:13px;font-weight:600;color:var(--ink)">Drop JSON or CSV file here</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">or click to browse</div>
+      </div>
+      <!-- Preview table -->
+      <div id="bulk-preview-wrap" style="display:none;margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:12px;font-weight:600;color:var(--ink)">
+            <span id="bulk-count">0</span> articles ready
+            <span id="bulk-err-count" style="color:#e74c3c;margin-left:8px;display:none"></span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" type="button" onclick="bulkSelectAll(true)">Select All</button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="bulkSelectAll(false)">Deselect All</button>
+          </div>
+        </div>
+        <div class="bulk-table-wrap">
+          <table class="bulk-table" id="bulk-table">
+            <thead><tr>
+              <th style="width:32px"><input type="checkbox" id="bulk-chk-all" checked onchange="bulkSelectAll(this.checked)"></th>
+              <th>Headline</th><th>Category</th><th>Author</th><th>Date</th><th>Status</th>
+            </tr></thead>
+            <tbody id="bulk-tbody"></tbody>
+          </table>
+        </div>
+        <div id="bulk-progress-wrap" style="display:none;margin-top:14px;">
+          <div class="bulk-progress-bar"><div class="bulk-progress-fill" id="bulk-progress-fill"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px;text-align:center" id="bulk-progress-txt">Publishing…</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+          <button class="btn btn-ghost btn-sm" type="button" onclick="resetBulk()">Clear</button>
+          <button class="btn btn-amber" type="button" id="bulk-publish-btn" onclick="startBulkPublish()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px"><polyline points="20 6 9 17 4 12"/></svg>
+            Publish Selected
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTAGRAM STORY MODAL -->
+<div class="ov" id="insta-modal" style="z-index:600;">
+  <div class="ov-box ov-box-sm">
+    <button class="ov-close" type="button" onclick="closeOv('insta-modal')">×</button>
+    <div class="ov-hdr">
+      <h2 style="display:flex;align-items:center;gap:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        Instagram Story Card
+      </h2>
+      <p>A 9:16 story card will be generated. Save it and upload to Instagram.</p>
+    </div>
+    <div class="ov-body" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+      <!-- Story preview -->
+      <div style="position:relative;width:220px;flex-shrink:0;">
+        <canvas id="insta-canvas" width="1080" height="1920" style="width:220px;height:391px;display:block;border:1px solid var(--border);background:#111;"></canvas>
+        <div id="insta-generating" style="position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:12px;gap:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="spin-icon"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          Generating…
+        </div>
+      </div>
+      <!-- Style options -->
+      <div style="width:100%;">
+        <label style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Style</label>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="insta-style-btn active" data-style="dark" onclick="setInstaStyle('dark',this)">Dark</button>
+          <button class="insta-style-btn" data-style="light" onclick="setInstaStyle('light',this)">Light</button>
+          <button class="insta-style-btn" data-style="plum" onclick="setInstaStyle('plum',this)">Plum</button>
+          <button class="insta-style-btn" data-style="amber" onclick="setInstaStyle('amber',this)">Amber</button>
+        </div>
+      </div>
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;width:100%;">
+        <button class="btn btn-ghost btn-sm" style="flex:1" type="button" onclick="regenerateStory()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-5.36"/></svg>
+          Regenerate
+        </button>
+        <button class="btn btn-amber" style="flex:1" type="button" onclick="downloadStory()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Save Image
+        </button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.6;">
+        Save the image → Open Instagram → Tap + → Story → Select this image → Share
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 7. DRAFTS MODAL -->
 <div class="ov" id="drafts-modal" style="z-index:550;">
   <div class="ov-box">
@@ -1087,6 +1228,9 @@ body{top:0!important;}
   <button class="btn btn-amber btn-sm" type="button" onclick="openPublish()">+ Publish</button>
   <button class="btn btn-ghost btn-sm" type="button" id="drafts-btn" onclick="openDrafts()" style="display:none">📝 Drafts <span id="draft-count-badge" class="draft-badge">0</span></button>
   <button class="btn btn-ghost btn-sm" type="button" onclick="openManage()">⚙ Manage</button>
+  <button class="btn btn-ghost btn-sm" type="button" onclick="openOv('bulk-modal');resetBulk()" title="Bulk Publish">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Bulk
+  </button>
   <button class="btn btn-ghost btn-sm" type="button" onclick="openOv('breaking-modal');renderBnList()" style="border-color:#e74c3c;color:#e74c3c;">🔴 Breaking News</button>
   <button class="btn btn-sm go-live-btn" type="button" id="go-live-btn" onclick="openLiveSetup()" title="Start Live Stream"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>Go Live</button>
   <button class="theme-btn" type="button" onclick="toggleTheme()" title="Toggle theme"><svg id="adminbar-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg id="adminbar-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
@@ -1223,7 +1367,7 @@ function initFB(){
     fbRtdb=fbApp.database();
     fbReady=true;
     console.log('Firebase ready ✓');
-    loadPublicStories();
+    loadPublicStories(function(){ setTimeout(readDeepLink,200); });
     fbAuth.onAuthStateChanged(function(user){
       if(user){
         localStorage.setItem('pIN_admin','1');
@@ -1443,15 +1587,15 @@ function syncAllToFirestore(){
 }
 
 /* Load published stories for ALL visitors — no auth needed */
-function loadPublicStories(){
-  if(!fbReady||!fbDb) return;
+function loadPublicStories(cb){
+  if(!fbReady||!fbDb){ if(cb) cb(); return; }
   showLoadingState(true);
   fbDb.collection('stories')
     .orderBy('date','desc')
     .get()
     .then(function(snap){
       showLoadingState(false);
-      if(snap.empty){ console.log('No stories in Firestore yet'); return; }
+      if(snap.empty){ console.log('No stories in Firestore yet'); if(cb) cb(); return; }
       /* Replace S with Firestore data, preserving local base64 blobs */
       snap.forEach(function(doc){
         var fs=doc.data();
@@ -1465,12 +1609,13 @@ function loadPublicStories(){
       save();
       renderAll();
       console.log('Public stories loaded from Firestore:',S.length);
+      if(cb) cb();
     })
     .catch(function(e){
       showLoadingState(false);
       console.warn('Firestore public load failed (using localStorage):',e.message);
-      /* Fallback to localStorage if Firestore fails */
       renderAll();
+      if(cb) cb();
     });
 }
 
@@ -1647,13 +1792,18 @@ function openArt(id){
   var artInner = document.getElementById('art-inner');
   artInner.innerHTML=buildArt(s);
   openOv('art-modal');
-  /* Activate embeds AFTER modal is visible so iframes can size correctly */
+  /* Push article URL to browser history so back button works */
+  var artUrl=window.location.origin+window.location.pathname+window.location.search+'#article-'+id;
+  history.pushState({articleId:id},'',artUrl);
+  /* Update page title + OG meta for social previews */
+  document.title=(s.headline||'Article')+' — The Perspective IN';
+  updateOgMeta(s, artUrl);
+  /* Activate embeds */
   setTimeout(function(){ activateEmbeds(artInner); }, 150);
   setTimeout(function(){
     if(window.twttr&&window.twttr.widgets) window.twttr.widgets.load();
     if(window.instgrm&&window.instgrm.Embeds) window.instgrm.Embeds.process();
   },600);
-  /* Refresh card view counts */
   renderAll();
 }
 
@@ -1666,15 +1816,19 @@ function buildArt(s){
   var rt=calcReadTime(s.body);
   var vc=getViewCount(s.id);
 
-  /* Share URLs */
-  var pageUrl=encodeURIComponent(window.location.href);
+  /* Share URLs — each article gets its own unique hash URL */
+  var artLink=window.location.origin+window.location.pathname+window.location.search+'#article-'+s.id;
+  var pageUrl=encodeURIComponent(artLink);
   var title=encodeURIComponent(s.headline||'');
   var shareBar='<div class="share-bar">'
     +'<span class="share-label">Share</span>'
     +'<a class="share-btn wa" href="https://wa.me/?text='+title+'%20'+pageUrl+'" target="_blank" rel="noopener">📱 WhatsApp</a>'
     +'<a class="share-btn tw" href="https://twitter.com/intent/tweet?text='+title+'&url='+pageUrl+'" target="_blank" rel="noopener">𝕏 Twitter</a>'
     +'<a class="share-btn fb" href="https://www.facebook.com/sharer/sharer.php?u='+pageUrl+'" target="_blank" rel="noopener">f Facebook</a>'
-    +'<button class="share-btn cp" type="button" onclick="copyLink()">🔗 Copy Link</button>'
+    +'<button class="share-btn cp" type="button" onclick="copyArticleLink(\''+s.id+'\')">🔗 Copy Link</button>'
+    +'<button class="share-btn insta" type="button" onclick="openInstaStory('+s.id+')" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;">'
+    +'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>'
+    +'Story</button>'
     +'</div>';
 
   /* Related articles */
@@ -1708,9 +1862,20 @@ function buildArt(s){
   return (img?'<img class="a-feat" src="'+esc(img)+'" alt="">':'')+'<div class="a-body-wrap">'+top+body+'</div>';
 }
 
-function copyLink(){
-  navigator.clipboard.writeText(window.location.href).then(function(){showToast('🔗 Link copied to clipboard!');}).catch(function(){showToast('Copy: '+window.location.href);});
+function copyArticleLink(artId){
+  var link=window.location.origin+window.location.pathname+window.location.search+'#article-'+artId;
+  navigator.clipboard.writeText(link).then(function(){
+    showToast('Link copied! Share it anywhere.');
+  }).catch(function(){
+    /* fallback for file:// or older browsers */
+    var ta=document.createElement('textarea');
+    ta.value=link; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); showToast('Link copied!'); }catch(e){ showToast('Copy this link: '+link); }
+    document.body.removeChild(ta);
+  });
 }
+function copyLink(){ copyArticleLink(''); }
 
 function buildVid(s){
   if(s.vidData) return '<video controls style="width:100%;max-height:340px;margin-top:14px;background:#000"><source src="'+esc(s.vidData)+'"></video>';
@@ -2551,6 +2716,15 @@ function closeOv(id){
     stopAutosave();
   }
   document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+  /* Restore clean URL when article closes */
+  if(id==='art-modal'){
+    if(window.location.hash && window.location.hash.startsWith('#article-')){
+      history.pushState({},'',window.location.pathname+window.location.search);
+    }
+    document.title='The Perspective IN';
+    resetOgMeta();
+  }
 }
 
 document.querySelectorAll('.ov').forEach(function(ov){
@@ -3150,6 +3324,496 @@ function watchLiveBanner(){
 }
 watchLiveBanner();
 
+
+/* ═══════════════════════════════════════
+   BULK PUBLISH
+═══════════════════════════════════════ */
+var _bulkArticles = [];
+
+function resetBulk(){
+  _bulkArticles=[];
+  document.getElementById('bulk-file-inp').value='';
+  document.getElementById('bulk-preview-wrap').style.display='none';
+  document.getElementById('bulk-drop').style.display='flex';
+  document.getElementById('bulk-progress-wrap').style.display='none';
+}
+
+function onBulkDrop(e){
+  e.preventDefault();
+  document.getElementById('bulk-drop').classList.remove('drag');
+  var f=e.dataTransfer.files[0];
+  if(f) parseBulkFile(f);
+}
+function onBulkFile(e){ var f=e.target.files[0]; if(f) parseBulkFile(f); }
+
+function parseBulkFile(f){
+  var ext=f.name.split('.').pop().toLowerCase();
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var articles=[];
+      if(ext==='json'){
+        var data=JSON.parse(ev.target.result);
+        articles=Array.isArray(data)?data:(data.articles||[data]);
+      } else if(ext==='csv'){
+        articles=csvToArticles(ev.target.result);
+      } else { showToast('Please upload a .json or .csv file.'); return; }
+      if(!articles.length){ showToast('No articles found in file.'); return; }
+      _bulkArticles=articles.map(function(a,i){
+        return {
+          _idx:i,
+          _selected:true,
+          _valid:!!(a.headline||a.title),
+          _error:(a.headline||a.title)?null:'Missing headline',
+          headline:  a.headline||a.title||'',
+          sub:       a.sub||a.subtitle||a.subheadline||'',
+          body:      a.body||a.content||'',
+          author:    a.author||'Staff Reporter',
+          cat:       a.cat||a.category||'general',
+          tags:      Array.isArray(a.tags)?a.tags:(a.tags?a.tags.split(',').map(function(t){return t.trim();}):[]),
+          imgUrl:    a.imgUrl||a.image||a.img||'',
+          vidUrl:    a.vidUrl||a.video||'',
+          status:    a.status||'published',
+          date:      a.date?new Date(a.date).getTime():Date.now(),
+          type:      a.type||'article',
+          layout:    a.layout||'top'
+        };
+      });
+      renderBulkPreview();
+      document.getElementById('bulk-drop').style.display='none';
+      document.getElementById('bulk-preview-wrap').style.display='block';
+    }catch(err){
+      showToast('Error parsing file: '+err.message);
+    }
+  };
+  r.readAsText(f);
+}
+
+function csvToArticles(csv){
+  var lines=csv.trim().split('\n');
+  if(lines.length<2) return [];
+  var headers=parseCsvLine(lines[0]);
+  return lines.slice(1).map(function(line){
+    var vals=parseCsvLine(line);
+    var obj={};
+    headers.forEach(function(h,i){ obj[h.trim()]=vals[i]||''; });
+    return obj;
+  });
+}
+
+function parseCsvLine(line){
+  var result=[],cur='',inQ=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(c==='"'){ inQ=!inQ; }
+    else if(c===','&&!inQ){ result.push(cur); cur=''; }
+    else { cur+=c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function renderBulkPreview(){
+  var valid=_bulkArticles.filter(function(a){return a._valid;}).length;
+  var errs=_bulkArticles.filter(function(a){return !a._valid;}).length;
+  document.getElementById('bulk-count').textContent=_bulkArticles.length;
+  var errEl=document.getElementById('bulk-err-count');
+  if(errs){ errEl.textContent=errs+' error(s)'; errEl.style.display='inline'; }
+  else errEl.style.display='none';
+
+  var tbody=document.getElementById('bulk-tbody');
+  tbody.innerHTML=_bulkArticles.map(function(a){
+    var badge=a._valid
+      ?'<span class="bulk-status-badge bulk-status-ok">Ready</span>'
+      :'<span class="bulk-status-badge bulk-status-err">'+escHtml(a._error||'Error')+'</span>';
+    var date=a.date?new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'Now';
+    return '<tr style="'+(a._valid?'':'opacity:.5')+'">'
+      +'<td><input type="checkbox" '+(a._selected&&a._valid?'checked':'')+' '+(a._valid?'':'disabled')+' onchange="bulkToggle('+a._idx+',this.checked)"></td>'
+      +'<td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+escHtml(a.headline)+'">'+escHtml(a.headline||'—')+'</td>'
+      +'<td>'+escHtml(a.cat)+'</td>'
+      +'<td>'+escHtml(a.author)+'</td>'
+      +'<td style="white-space:nowrap">'+date+'</td>'
+      +'<td>'+badge+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function bulkToggle(idx, checked){
+  var a=_bulkArticles.find(function(x){return x._idx===idx;});
+  if(a) a._selected=checked;
+}
+
+function bulkSelectAll(checked){
+  _bulkArticles.forEach(function(a){ if(a._valid) a._selected=checked; });
+  document.getElementById('bulk-chk-all').checked=checked;
+  renderBulkPreview();
+}
+
+async function startBulkPublish(){
+  var selected=_bulkArticles.filter(function(a){return a._selected&&a._valid;});
+  if(!selected.length){ showToast('Select at least one article to publish.'); return; }
+
+  var btn=document.getElementById('bulk-publish-btn');
+  btn.disabled=true;
+  var progWrap=document.getElementById('bulk-progress-wrap');
+  var progFill=document.getElementById('bulk-progress-fill');
+  var progTxt=document.getElementById('bulk-progress-txt');
+  progWrap.style.display='block';
+
+  var done=0, errors=0;
+  for(var i=0;i<selected.length;i++){
+    var a=selected[i];
+    progTxt.textContent='Publishing '+(i+1)+' of '+selected.length+': "'+a.headline.substring(0,40)+'"…';
+    try{
+      var story={
+        id: Date.now()+i,
+        headline: a.headline,
+        sub:      a.sub,
+        body:     a.body,
+        author:   a.author,
+        cat:      a.cat,
+        tags:     a.tags,
+        imgUrl:   a.imgUrl,
+        imgData:  null,
+        allImgData:[],
+        vidUrl:   a.vidUrl,
+        vidData:  null,
+        status:   a.status||'published',
+        date:     a.date||Date.now(),
+        type:     a.type||'article',
+        layout:   a.layout||'top',
+        thumb:    a.imgUrl||null,
+        embedCode:null,
+        links:[],
+        socialUrl:null,
+        scheduleTs:null,
+        views:0
+      };
+      S.unshift(story);
+      saveImgSeparate(story.id, null, null);
+      save();
+      saveToFirestore(story);
+      done++;
+    } catch(err){ errors++; console.error('Bulk publish error for "'+a.headline+'":',err); }
+    progFill.style.width=Math.round(((i+1)/selected.length)*100)+'%';
+    await new Promise(function(res){setTimeout(res,120);});
+  }
+
+  progTxt.textContent='Done! '+done+' published'+(errors?' ('+errors+' errors)':'')+'.'
+  btn.disabled=false;
+  renderAll();
+  setTimeout(function(){
+    closeOv('bulk-modal');
+    showToast(done+' articles published successfully!');
+    resetBulk();
+  },1800);
+}
+
+function downloadBulkTemplate(){
+  var template=[
+    {headline:'Sample Article 1',sub:'A subheadline here',body:'<p>Article body content goes here.</p>',author:'Reporter Name',cat:'politics',tags:'politics,india',imgUrl:'https://example.com/image.jpg',status:'published'},
+    {headline:'Sample Article 2',sub:'Another subheadline',body:'<p>Second article body.</p>',author:'Staff Reporter',cat:'business',tags:'business,economy',imgUrl:'',status:'published'}
+  ];
+  var blob=new Blob([JSON.stringify(template,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='bulk-template.json'; a.click();
+}
+
+/* ═══════════════════════════════════════
+   INSTAGRAM STORY GENERATOR
+   Canvas: 1080 × 1920 (9:16)
+═══════════════════════════════════════ */
+var _instaStory = { artId:null, style:'dark' };
+var _instaStyles = {
+  dark:  { bg:'#0d0d0d',  accent:'#C8882A', text:'#ffffff', sub:'rgba(255,255,255,.75)', body:'rgba(255,255,255,.6)',  overlay:'rgba(0,0,0,.55)' },
+  light: { bg:'#f5f0eb',  accent:'#C8882A', text:'#1a0f1a', sub:'rgba(26,15,26,.7)',    body:'rgba(26,15,26,.6)',     overlay:'rgba(245,240,235,.5)' },
+  plum:  { bg:'#2d1b2e',  accent:'#C8882A', text:'#ffffff', sub:'rgba(255,255,255,.75)', body:'rgba(255,255,255,.6)', overlay:'rgba(45,27,46,.6)' },
+  amber: { bg:'#C8882A',  accent:'#ffffff', text:'#ffffff', sub:'rgba(255,255,255,.85)', body:'rgba(255,255,255,.7)', overlay:'rgba(200,136,42,.4)' }
+};
+
+function openInstaStory(artId){
+  var s=S.find(function(x){return x.id===artId;});
+  if(!s){ showToast('Article not found.'); return; }
+  _instaStory.artId=artId;
+  _instaStory.style='dark';
+  document.querySelectorAll('.insta-style-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.style==='dark'); });
+  openOv('insta-modal');
+  setTimeout(function(){ drawStoryCard(s); },100);
+}
+
+function setInstaStyle(style, btn){
+  _instaStory.style=style;
+  document.querySelectorAll('.insta-style-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var s=S.find(function(x){return x.id===_instaStory.artId;});
+  if(s) drawStoryCard(s);
+}
+
+function regenerateStory(){
+  var s=S.find(function(x){return x.id===_instaStory.artId;});
+  if(s) drawStoryCard(s);
+}
+
+function drawStoryCard(story){
+  var gen=document.getElementById('insta-generating');
+  if(gen) gen.style.display='flex';
+
+  var canvas=document.getElementById('insta-canvas');
+  var ctx=canvas.getContext('2d');
+  var W=1080, H=1920;
+  canvas.width=W; canvas.height=H;
+
+  var st=_instaStyles[_instaStory.style]||_instaStyles.dark;
+  var imgSrc=story.imgUrl||(story.thumb&&story.thumb.startsWith('http')?story.thumb:'')||(story.imgData||'');
+
+  function draw(imgEl){
+    ctx.clearRect(0,0,W,H);
+
+    /* Background */
+    ctx.fillStyle=st.bg;
+    ctx.fillRect(0,0,W,H);
+
+    /* Image — top 55% of card */
+    if(imgEl){
+      var imgH=Math.round(H*0.58);
+      /* Draw image covering top area */
+      var ir=imgEl.width/imgEl.height;
+      var cR=W/imgH;
+      var dw,dh,dx,dy;
+      if(ir>cR){ dh=imgH; dw=dh*ir; dx=(W-dw)/2; dy=0; }
+      else { dw=W; dh=dw/ir; dx=0; dy=(imgH-dh)/2; }
+      ctx.drawImage(imgEl,dx,dy,dw,dh);
+      /* Gradient overlay over image bottom */
+      var grad=ctx.createLinearGradient(0,imgH*0.3,0,imgH);
+      grad.addColorStop(0,'transparent');
+      grad.addColorStop(1,st.bg);
+      ctx.fillStyle=grad;
+      ctx.fillRect(0,0,W,imgH);
+    }
+
+    /* Accent top bar */
+    ctx.fillStyle=st.accent;
+    ctx.fillRect(0,0,W,12);
+
+    /* Masthead */
+    ctx.font='bold 34px sans-serif';
+    ctx.fillStyle=st.accent;
+    ctx.letterSpacing='4px';
+    ctx.fillText('THE PERSPECTIVE IN', 72, 88);
+
+    /* Category pill */
+    var imgBase = imgEl ? Math.round(H*0.56) : 320;
+    var yStart = imgBase + 40;
+
+    ctx.fillStyle=st.accent;
+    ctx.fillRect(72, yStart, 180, 6);
+
+    var cat=(story.cat||'GENERAL').toUpperCase();
+    ctx.font='600 30px sans-serif';
+    ctx.fillStyle=st.accent;
+    ctx.letterSpacing='3px';
+    ctx.fillText(cat, 72, yStart+64);
+
+    /* Headline */
+    ctx.letterSpacing='0px';
+    var headY=yStart+110;
+    var headFont=story.headline.length>60?62:story.headline.length>40?72:84;
+    ctx.font='bold '+headFont+'px serif';
+    ctx.fillStyle=st.text;
+    var headLines=wrapText(ctx,story.headline,72,W-144,headFont*1.22);
+    headLines.forEach(function(line,i){
+      ctx.fillText(line.text,72,headY+line.y);
+    });
+    var headEnd=headY+(headLines.length*(headFont*1.22));
+
+    /* Sub headline */
+    if(story.sub && headEnd < H-320){
+      ctx.font='italic 38px serif';
+      ctx.fillStyle=st.sub;
+      var subLines=wrapText(ctx,story.sub,72,W-144,50);
+      subLines.slice(0,2).forEach(function(line,i){
+        ctx.fillText(line.text,72,headEnd+40+line.y);
+      });
+      headEnd=headEnd+40+(Math.min(subLines.length,2)*50);
+    }
+
+    /* Body excerpt */
+    if(story.body && headEnd < H-260){
+      var bodyText=story.body.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().substring(0,220);
+      ctx.font='36px sans-serif';
+      ctx.fillStyle=st.body;
+      var bodyLines=wrapText(ctx,bodyText,72,W-144,46);
+      var maxBodyLines=Math.floor((H-280-headEnd-60)/46);
+      maxBodyLines=Math.max(1,Math.min(maxBodyLines,4));
+      bodyLines.slice(0,maxBodyLines).forEach(function(line){
+        ctx.fillText(line.text,72,headEnd+50+line.y);
+      });
+    }
+
+    /* Bottom bar: "Read More" + arrow */
+    var barY=H-120;
+    ctx.fillStyle=st.accent;
+    ctx.fillRect(0,barY,W,2);
+    ctx.font='600 36px sans-serif';
+    ctx.fillStyle=st.accent;
+    ctx.letterSpacing='2px';
+    ctx.fillText('READ MORE',72,barY+68);
+    /* Arrow */
+    ctx.strokeStyle=st.accent;
+    ctx.lineWidth=5;
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(320,barY+50);
+    ctx.lineTo(370,barY+50);
+    ctx.moveTo(348,barY+30);
+    ctx.lineTo(370,barY+50);
+    ctx.lineTo(348,barY+70);
+    ctx.stroke();
+
+    /* Bottom accent bar */
+    ctx.fillStyle=st.accent;
+    ctx.fillRect(0,H-8,W,8);
+
+    /* Done */
+    if(gen) gen.style.display='none';
+  }
+
+  if(imgSrc){
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){ draw(img); };
+    img.onerror=function(){ draw(null); };
+    img.src=imgSrc;
+  } else {
+    draw(null);
+  }
+}
+
+function wrapText(ctx, text, x, maxW, lineH){
+  var words=text.split(' ');
+  var lines=[];
+  var line='';
+  var y=0;
+  for(var i=0;i<words.length;i++){
+    var test=line+(line?' ':'')+words[i];
+    if(ctx.measureText(test).width>maxW && line){
+      lines.push({text:line,y:y}); y+=lineH; line=words[i];
+    } else { line=test; }
+  }
+  if(line) lines.push({text:line,y:y});
+  return lines;
+}
+
+function downloadStory(){
+  var canvas=document.getElementById('insta-canvas');
+  var s=S.find(function(x){return x.id===_instaStory.artId;});
+  var filename=(s?s.headline.substring(0,30).replace(/[^a-z0-9]/gi,'_').toLowerCase():'story')+'_instagram.jpg';
+  var link=document.createElement('a');
+  link.download=filename;
+  link.href=canvas.toDataURL('image/jpeg',0.95);
+  link.click();
+  showToast('Story card saved! Upload it to Instagram.');
+}
+
+
+/* ═══════════════════════════════════════
+   UPDATE OPEN GRAPH META TAGS
+   Called when an article opens so social
+   previews show article title + image.
+═══════════════════════════════════════ */
+function updateOgMeta(story, artUrl){
+  var title=(story.headline||'The Perspective IN')+' — The Perspective IN';
+  var desc=story.sub||story.body&&story.body.replace(/<[^>]+>/g,'').substring(0,200)||'Independent journalism. Unfiltered perspective.';
+  var img=story.imgUrl||(story.thumb&&story.thumb.startsWith('http')?story.thumb:'')||'';
+  var url=artUrl||window.location.href;
+
+  /* <title> */
+  document.title=title;
+
+  /* OG tags */
+  setMeta('og-title', title);
+  setMeta('og-desc',  desc);
+  setMeta('og-url',   url);
+  setMeta('og-image', img);
+
+  /* Twitter tags */
+  setMeta('tw-title', title);
+  setMeta('tw-desc',  desc);
+  setMeta('tw-image', img);
+  setMeta('tw-card',  img?'summary_large_image':'summary');
+
+  /* Also set <meta name="description"> */
+  var d=document.querySelector('meta[name="description"]');
+  if(d) d.setAttribute('content', desc);
+}
+
+function resetOgMeta(){
+  document.title='The Perspective IN';
+  setMeta('og-title','The Perspective IN');
+  setMeta('og-desc','Independent journalism. Unfiltered perspective.');
+  setMeta('og-url', window.location.origin+window.location.pathname);
+  setMeta('og-image','');
+  setMeta('tw-title','The Perspective IN');
+  setMeta('tw-desc','Independent journalism. Unfiltered perspective.');
+  setMeta('tw-image','');
+  setMeta('tw-card','summary');
+}
+
+function setMeta(id, val){
+  var el=document.getElementById(id);
+  if(!el) return;
+  var attr=el.hasAttribute('content')?'content':'';
+  if(!attr) return;
+  el.setAttribute('content', val||'');
+}
+
+/* ═══════════════════════════════════════
+   DEEP LINK HANDLER
+   Reads #article-{id} from URL on load
+   and opens that article automatically.
+   Also handles browser back/forward.
+═══════════════════════════════════════ */
+function readDeepLink(){
+  var hash=window.location.hash||'';
+  if(hash.startsWith('#article-')){
+    var artId=hash.replace('#article-','');
+    /* Wait for stories to load from Firebase or localStorage */
+    function tryOpen(attempts){
+      var s=S.find(function(x){ return String(x.id)===String(artId); });
+      if(s){
+        openArt(s.id);
+      } else if(attempts<20){
+        setTimeout(function(){ tryOpen(attempts+1); }, 300);
+      } else {
+        showToast('Article not found or still loading.');
+      }
+    }
+    tryOpen(0);
+  }
+}
+
+/* Run on page load */
+window.addEventListener('load', function(){
+  setTimeout(readDeepLink, 600);
+});
+
+/* Handle browser back/forward button */
+window.addEventListener('popstate', function(e){
+  if(window.location.hash && window.location.hash.startsWith('#article-')){
+    var artId=window.location.hash.replace('#article-','');
+    var s=S.find(function(x){ return String(x.id)===String(artId); });
+    if(s) openArt(s.id);
+  } else {
+    /* Back to home — close any open article */
+    var artModal=document.getElementById('art-modal');
+    if(artModal && artModal.classList.contains('open')){
+      artModal.classList.remove('open');
+      document.body.style.overflow='';
+      document.title='The Perspective IN';
+    }
+  }
+});
 
 /* Check for interrupted draft on load */
 setTimeout(function(){
